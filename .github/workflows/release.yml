@@ -34,10 +34,6 @@ jobs:
           version: "23.x"
       - name: Install dependencies
         run: go mod download
-      - name: Install protoc-gen-go
-        run: go install github.com/golang/protobuf/protoc-gen-go@latest
-      - name: Install protoc-gen-go-grpc
-        run: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
       - name: Generate the code
         run: go generate -v ./...
       - name: golangci-lint
@@ -95,10 +91,6 @@ jobs:
           version: "23.x"
       - name: Install dependencies
         run: go mod download
-      - name: Install protoc-gen-go
-        run: go install github.com/golang/protobuf/protoc-gen-go@latest
-      - name: Install protoc-gen-go-grpc
-        run: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
       - name: Generate the code
         run: go generate -v ./...
       - name: Build & Publish release release
