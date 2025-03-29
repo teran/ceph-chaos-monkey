@@ -95,15 +95,13 @@ jobs:
           args: build --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push container image
+      - name: Build container image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           platforms: amd64
-          push: true
+          push: false
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${{ steps.timestamp.outputs.now }}
+            ghcr.io/${{ github.repository }}:pr-latest
           outputs: type=image,name=ghcr.io/${{ github.repository }},annotation-index.org.opencontainers.image.description=${{ github.repository }}
