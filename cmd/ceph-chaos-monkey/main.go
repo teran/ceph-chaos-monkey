@@ -35,9 +35,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	if interval < 45 {
+		fmt.Println("Please set interval >=45s to allow Ceph to react and give you a proper status.")
+		os.Exit(1)
+	}
+
 	duration, err := strconv.ParseUint(os.Args[2], 10, 64)
 	if err != nil {
 		fmt.Printf("Incorrect duration value, must be integer: %s", os.Args[1])
+		os.Exit(1)
+	}
+
+	if duration > 60*60 {
+		fmt.Println("Please avoid duration >=1h to have some time to analyze what you've done and what actually happened")
 		os.Exit(1)
 	}
 

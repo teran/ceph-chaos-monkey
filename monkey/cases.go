@@ -86,8 +86,8 @@ func createPoolAndPutAmountOfObjects(ctx context.Context, c ceph.Cluster) error 
 		return err
 	}
 
-	maxSize := 15 * 1024 * 1024
-	amount := getRandomChoice(100)
+	maxSize := 150 * 1024 * 1024
+	amount := getRandomChoice(50)
 
 	for i := 0; i < amount; i++ {
 		buf := make([]byte, getRandomChoice(maxSize))
