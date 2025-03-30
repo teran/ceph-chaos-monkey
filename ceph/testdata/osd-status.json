@@ -1,0 +1,46 @@
+{
+    "OSDs": [
+      {
+        "host name": "",
+        "id": 0,
+        "kb available": 0,
+        "kb used": 0,
+        "read byte rate": 0,
+        "read ops rate": 0,
+        "state": [
+          "autoout",
+          "exists"
+        ],
+        "write byte rate": 0,
+        "write ops rate": 0
+      },
+      {
+        "host name": "",
+        "id": 1,
+        "kb available": 0,
+        "kb used": 0,
+        "read byte rate": 0,
+        "read ops rate": 0,
+        "state": [
+          "exists"
+        ],
+        "write byte rate": 0,
+        "write ops rate": 0
+      },
+      {
+        "host name": "ceph03",
+        "id": 2,
+        "kb available": 29950885888,
+        "kb used": 2257174528,
+        "read byte rate": 0,
+        "read ops rate": 0,
+        "state": [
+          "exists",
+          "up"
+        ],
+        "write byte rate": 0,
+        "write ops rate": 0
+      }
+    ]
+  }
+  
