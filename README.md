@@ -18,3 +18,6 @@ you're running ceph-chaos-monkey.
 Usage: ./ceph-chaos-monkey FUSS_INTERVAL GAME_DURATION
 Both FUSS_INTERVAL and GAME_DURATION are in seconds
 ```
+
+ceph-chaos-monkey distributed as a container image so you could simply update
+to it via `ceph orch upgrade`.
