@@ -116,6 +116,8 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:v19.2.1-latest
+            ghcr.io/${{ github.repository }}:v19
+            ghcr.io/${{ github.repository }}:v19.2.1
             ghcr.io/${{ github.repository }}:v19.2.1-${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:v19.2.1-${{ github.ref_name }}-${{ steps.timestamp.outputs.now }}
           outputs: type=image,name=ghcr.io/${{ github.repository }},annotation-index.org.opencontainers.image.description=${{ github.repository }}
