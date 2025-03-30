@@ -1,0 +1,106 @@
+{
+    "epoch": 3,
+    "fsid": "04bf6fec-0813-11f0-a8cb-001c42bbdb5b",
+    "modified": "2025-03-23T18:26:15.271356Z",
+    "created": "2025-03-23T18:18:08.507265Z",
+    "min_mon_release": 19,
+    "min_mon_release_name": "squid",
+    "election_strategy": 1,
+    "disallowed_leaders: ": "",
+    "stretch_mode": false,
+    "tiebreaker_mon": "",
+    "removed_ranks: ": "",
+    "features": {
+      "persistent": [
+        "kraken",
+        "luminous",
+        "mimic",
+        "osdmap-prune",
+        "nautilus",
+        "octopus",
+        "pacific",
+        "elector-pinging",
+        "quincy",
+        "reef",
+        "squid"
+      ],
+      "optional": []
+    },
+    "mons": [
+      {
+        "rank": 0,
+        "name": "ceph01",
+        "public_addrs": {
+          "addrvec": [
+            {
+              "type": "v2",
+              "addr": "100.64.65.19:3300",
+              "nonce": 0
+            },
+            {
+              "type": "v1",
+              "addr": "100.64.65.19:6789",
+              "nonce": 0
+            }
+          ]
+        },
+        "addr": "100.64.65.19:6789/0",
+        "public_addr": "100.64.65.19:6789/0",
+        "priority": 0,
+        "weight": 0,
+        "crush_location": "{}"
+      },
+      {
+        "rank": 1,
+        "name": "ceph02",
+        "public_addrs": {
+          "addrvec": [
+            {
+              "type": "v2",
+              "addr": "100.64.65.20:3300",
+              "nonce": 0
+            },
+            {
+              "type": "v1",
+              "addr": "100.64.65.20:6789",
+              "nonce": 0
+            }
+          ]
+        },
+        "addr": "100.64.65.20:6789/0",
+        "public_addr": "100.64.65.20:6789/0",
+        "priority": 0,
+        "weight": 0,
+        "crush_location": "{}"
+      },
+      {
+        "rank": 2,
+        "name": "ceph03",
+        "public_addrs": {
+          "addrvec": [
+            {
+              "type": "v2",
+              "addr": "100.64.65.21:3300",
+              "nonce": 0
+            },
+            {
+              "type": "v1",
+              "addr": "100.64.65.21:6789",
+              "nonce": 0
+            }
+          ]
+        },
+        "addr": "100.64.65.21:6789/0",
+        "public_addr": "100.64.65.21:6789/0",
+        "priority": 0,
+        "weight": 0,
+        "crush_location": "{}"
+      }
+    ],
+    "quorum": [
+      0,
+      1,
+      2
+    ]
+  }
+  
