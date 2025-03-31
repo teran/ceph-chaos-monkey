@@ -39,6 +39,10 @@ type Cluster interface {
 	ReweightByUtilization(ctx context.Context) error
 
 	CreateRADOSObject(ctx context.Context, pool, objectName string, data []byte) error
+
+	SetNearFullRatio(ctx context.Context, value float64) error
+	SetBackfillfullRatio(ctx context.Context, value float64) error
+	SetFullRatio(ctx context.Context, value float64) error
 }
 
 type cluster struct {
@@ -171,5 +175,20 @@ func (c *cluster) CreateDefaultPool(ctx context.Context, name string) error {
 
 func (c *cluster) CreateRADOSObject(ctx context.Context, pool, objectName string, data []byte) error {
 	_, _, err := c.runner.RunRadosBinary(ctx, data, "put", "--pool="+pool, objectName, "-")
+	return err
+}
+
+func (c *cluster) SetNearFullRatio(ctx context.Context, value float64) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "set-nearfull-ratio", strconv.FormatFloat(value, 'f', -1, 64))
+	return err
+}
+
+func (c *cluster) SetBackfillfullRatio(ctx context.Context, value float64) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "set-backfillfull-ratio", strconv.FormatFloat(value, 'f', -1, 64))
+	return err
+}
+
+func (c *cluster) SetFullRatio(ctx context.Context, value float64) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "set-full-ratio", strconv.FormatFloat(value, 'f', -1, 64))
 	return err
 }

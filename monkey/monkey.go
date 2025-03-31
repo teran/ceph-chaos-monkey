@@ -115,6 +115,7 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 		randomlyResizeRandomPool, randomlyChangePGNumForRandomPool,
 		reweightByUtilization,
 		createPoolAndPutAmountOfObjects,
+		setRandomNearFullRatio, setRandomBackfillfullRatio, setRandomFullRatio,
 	}
 
 	fn := cases[getRandomChoice(len(cases))]

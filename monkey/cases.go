@@ -106,3 +106,15 @@ func createPoolAndPutAmountOfObjects(ctx context.Context, c ceph.Cluster) error 
 	}
 	return nil
 }
+
+func setRandomNearFullRatio(ctx context.Context, c ceph.Cluster) error {
+	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
+}
+
+func setRandomBackfillfullRatio(ctx context.Context, c ceph.Cluster) error {
+	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
+}
+
+func setRandomFullRatio(ctx context.Context, c ceph.Cluster) error {
+	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
+}
