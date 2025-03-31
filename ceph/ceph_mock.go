@@ -75,3 +75,18 @@ func (m *ClusterMock) CreateRADOSObject(ctx context.Context, pool, objectName st
 	args := m.Called(pool, objectName)
 	return args.Error(0)
 }
+
+func (m *ClusterMock) SetNearFullRatio(ctx context.Context, value float64) error {
+	args := m.Called(value)
+	return args.Error(0)
+}
+
+func (m *ClusterMock) SetBackfillfullRatio(ctx context.Context, value float64) error {
+	args := m.Called(value)
+	return args.Error(0)
+}
+
+func (m *ClusterMock) SetFullRatio(ctx context.Context, value float64) error {
+	args := m.Called(value)
+	return args.Error(0)
+}

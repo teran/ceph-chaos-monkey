@@ -176,6 +176,41 @@ func (s *cephTestSuite) TestReweightByUtilization() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestCreateDefaultPool() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "pool", "create", "test-pool"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.CreateDefaultPool(s.ctx, "test-pool")
+	s.Require().NoError(err)
+}
+
+func (s *cephTestSuite) TestCreatRADOSObject() {
+	s.runnerMock.On("RunRadosBinary", []byte(`test data`), []string{"put", "--pool=test-pool", "test-object", "-"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.CreateRADOSObject(s.ctx, "test-pool", "test-object", []byte(`test data`))
+	s.Require().NoError(err)
+}
+
+func (s *cephTestSuite) TestSetNearFullRatio() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "set-nearfull-ratio", "0.15"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.SetNearFullRatio(s.ctx, 0.15)
+	s.Require().NoError(err)
+}
+
+func (s *cephTestSuite) TestSetBackfillfullRatio() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "set-backfillfull-ratio", "0.2"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.SetBackfillfullRatio(s.ctx, 0.2)
+	s.Require().NoError(err)
+}
+
+func (s *cephTestSuite) TestSetFullRatio() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "set-full-ratio", "0.3"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.SetFullRatio(s.ctx, 0.3)
+	s.Require().NoError(err)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite
