@@ -137,7 +137,7 @@ func (c *cluster) ChangePoolPGNum(ctx context.Context, name string, pgs uint64) 
 }
 
 func (c *cluster) ReweightByUtilization(ctx context.Context) error {
-	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "reweight-by-utilization", "100")
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "reweight-by-utilization")
 	return err
 }
 

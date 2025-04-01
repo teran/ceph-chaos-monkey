@@ -178,7 +178,7 @@ func (s *cephTestSuite) TestStopOSDDaemon() {
 }
 
 func (s *cephTestSuite) TestReweightByUtilization() {
-	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "reweight-by-utilization", "100"}).Return([]byte{}, []byte{}, nil).Once()
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "reweight-by-utilization"}).Return([]byte{}, []byte{}, nil).Once()
 
 	err := s.cluster.ReweightByUtilization(s.ctx)
 	s.Require().NoError(err)
