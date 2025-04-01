@@ -32,18 +32,18 @@ func unsetRandomFlag(ctx context.Context, c ceph.Cluster) error {
 }
 
 func destroyRandomOSD(ctx context.Context, c ceph.Cluster) error {
-	osds, err := c.GetOSDs(ctx)
+	ids, err := c.GetOSDIDs(ctx)
 	if err != nil {
 		return err
 	}
 
-	if len(osds) == 0 {
+	if len(ids) == 0 {
 		return errors.New("no OSDs are present in the cluster")
 	}
 
-	osd := osds[getRandomChoice(len(osds))]
+	id := ids[getRandomChoice(len(ids))]
 
-	return c.DestroyOSD(ctx, osd.ID)
+	return c.DestroyOSD(ctx, id)
 }
 
 func randomlyResizeRandomPool(ctx context.Context, c ceph.Cluster) error {
