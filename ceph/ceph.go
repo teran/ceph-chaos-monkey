@@ -24,6 +24,7 @@ const (
 
 type Cluster interface {
 	GetOSDs(ctx context.Context) ([]OSD, error)
+	GetOSDIDs(ctx context.Context) ([]uint64, error)
 	GetMons(ctx context.Context) ([]Mon, error)
 
 	DestroyOSD(ctx context.Context, id uint64) error
@@ -72,6 +73,21 @@ func (c *cluster) GetOSDs(ctx context.Context) ([]OSD, error) {
 	}
 
 	return data.OSDs, nil
+}
+
+func (c *cluster) GetOSDIDs(ctx context.Context) ([]uint64, error) {
+	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "ls", "--format=json")
+	if err != nil {
+		log.Debugf("command stderr: %s", string(stderr))
+		return nil, err
+	}
+
+	data := []uint64{}
+	if err := json.Unmarshal(stdout, &data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func (c *cluster) GetMons(ctx context.Context) ([]Mon, error) {

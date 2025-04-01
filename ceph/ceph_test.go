@@ -60,6 +60,14 @@ func (s *cephTestSuite) TestGetOSDs() {
 	}, osds)
 }
 
+func (s *cephTestSuite) TestGetOSDIDs() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "ls", "--format=json"}).Return([]byte(`[0,3,4,5,67]`), []byte{}, nil).Once()
+
+	ids, err := s.cluster.GetOSDIDs(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]uint64{0, 3, 4, 5, 67}, ids)
+}
+
 func (s *cephTestSuite) TestGetMons() {
 	stdout, err := os.ReadFile("testdata/mon-dump.json")
 	s.Require().NoError(err)
