@@ -1,4 +1,4 @@
-package ceph
+package shell
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"github.com/teran/ceph-chaos-monkey/ceph"
+	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
 
 func (s *cephTestSuite) TestGetOSDs() {
@@ -15,7 +17,7 @@ func (s *cephTestSuite) TestGetOSDs() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "status", "--format=json"}).Return(stdout, []byte{}, nil).Once()
 	osds, err := s.cluster.GetOSDs(s.ctx)
 	s.Require().NoError(err)
-	s.Require().Equal([]OSD{
+	s.Require().Equal([]ceph.OSD{
 		{
 			HostName:     "",
 			ID:           0,
@@ -75,7 +77,7 @@ func (s *cephTestSuite) TestGetMons() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"mon", "dump", "--format=json"}).Return(stdout, []byte{}, nil).Once()
 	mons, err := s.cluster.GetMons(s.ctx)
 	s.Require().NoError(err)
-	s.Require().Equal([]Mon{
+	s.Require().Equal([]ceph.Mon{
 		{
 			Rank:       0,
 			Name:       "ceph01",
@@ -106,14 +108,14 @@ func (s *cephTestSuite) TestGetMons() {
 func (s *cephTestSuite) TestSetFlag() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "set", "norecover"}).Return([]byte{}, []byte{}, nil).Once()
 
-	err := s.cluster.SetFlag(s.ctx, FlagNoRecover)
+	err := s.cluster.SetFlag(s.ctx, ceph.FlagNoRecover)
 	s.Require().NoError(err)
 }
 
 func (s *cephTestSuite) TestUnsetFlag() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "unset", "norecover"}).Return([]byte{}, []byte{}, nil).Once()
 
-	err := s.cluster.UnsetFlag(s.ctx, FlagNoRecover)
+	err := s.cluster.UnsetFlag(s.ctx, ceph.FlagNoRecover)
 	s.Require().NoError(err)
 }
 
@@ -138,7 +140,7 @@ func (s *cephTestSuite) TestGetPools() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "pool", "ls", "detail", "--format=json"}).Return(stdout, []byte{}, nil).Once()
 	mons, err := s.cluster.GetPools(s.ctx)
 	s.Require().NoError(err)
-	s.Require().Equal([]Pool{
+	s.Require().Equal([]ceph.Pool{
 		{
 			PoolID:             1,
 			PoolName:           ".mgr",
@@ -224,7 +226,7 @@ type cephTestSuite struct {
 	suite.Suite
 
 	ctx        context.Context
-	cluster    Cluster
+	cluster    drivers.Cluster
 	runnerMock *runnerMock
 }
 

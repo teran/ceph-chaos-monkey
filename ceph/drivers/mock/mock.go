@@ -1,24 +1,26 @@
-package ceph
+package mock
 
 import (
 	"context"
 
 	"github.com/stretchr/testify/mock"
+	"github.com/teran/ceph-chaos-monkey/ceph"
+	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
 
-var _ Cluster = (*ClusterMock)(nil)
+var _ drivers.Cluster = (*ClusterMock)(nil)
 
 type ClusterMock struct {
 	mock.Mock
 }
 
-func NewClusterMock() *ClusterMock {
+func New() *ClusterMock {
 	return &ClusterMock{}
 }
 
-func (m *ClusterMock) GetOSDs(context.Context) ([]OSD, error) {
+func (m *ClusterMock) GetOSDs(context.Context) ([]ceph.OSD, error) {
 	args := m.Called()
-	return args.Get(0).([]OSD), args.Error(1)
+	return args.Get(0).([]ceph.OSD), args.Error(1)
 }
 
 func (m *ClusterMock) GetOSDIDs(ctx context.Context) ([]uint64, error) {
@@ -26,9 +28,9 @@ func (m *ClusterMock) GetOSDIDs(ctx context.Context) ([]uint64, error) {
 	return args.Get(0).([]uint64), args.Error(1)
 }
 
-func (m *ClusterMock) GetMons(context.Context) ([]Mon, error) {
+func (m *ClusterMock) GetMons(context.Context) ([]ceph.Mon, error) {
 	args := m.Called()
-	return args.Get(0).([]Mon), args.Error(1)
+	return args.Get(0).([]ceph.Mon), args.Error(1)
 }
 
 func (m *ClusterMock) DestroyOSD(_ context.Context, id uint64) error {
@@ -41,19 +43,19 @@ func (m *ClusterMock) StopOSDDaemon(_ context.Context, id uint64) error {
 	return args.Error(0)
 }
 
-func (m *ClusterMock) SetFlag(_ context.Context, flag Flag) error {
+func (m *ClusterMock) SetFlag(_ context.Context, flag ceph.Flag) error {
 	args := m.Called(flag)
 	return args.Error(0)
 }
 
-func (m *ClusterMock) UnsetFlag(_ context.Context, flag Flag) error {
+func (m *ClusterMock) UnsetFlag(_ context.Context, flag ceph.Flag) error {
 	args := m.Called(flag)
 	return args.Error(0)
 }
 
-func (m *ClusterMock) GetPools(context.Context) ([]Pool, error) {
+func (m *ClusterMock) GetPools(context.Context) ([]ceph.Pool, error) {
 	args := m.Called()
-	return args.Get(0).([]Pool), args.Error(1)
+	return args.Get(0).([]ceph.Pool), args.Error(1)
 }
 
 func (m *ClusterMock) ResizePool(_ context.Context, name string, size uint64) error {

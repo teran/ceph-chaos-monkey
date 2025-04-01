@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/teran/ceph-chaos-monkey/ceph"
+	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
 
 var cephFlags = []ceph.Flag{
@@ -23,15 +24,15 @@ var cephFlags = []ceph.Flag{
 	ceph.FlagPause,
 }
 
-func setRandomFlag(ctx context.Context, c ceph.Cluster) error {
+func setRandomFlag(ctx context.Context, c drivers.Cluster) error {
 	return c.SetFlag(ctx, cephFlags[getRandomChoice(len(cephFlags))])
 }
 
-func unsetRandomFlag(ctx context.Context, c ceph.Cluster) error {
+func unsetRandomFlag(ctx context.Context, c drivers.Cluster) error {
 	return c.UnsetFlag(ctx, cephFlags[getRandomChoice(len(cephFlags))])
 }
 
-func destroyRandomOSD(ctx context.Context, c ceph.Cluster) error {
+func destroyRandomOSD(ctx context.Context, c drivers.Cluster) error {
 	ids, err := c.GetOSDIDs(ctx)
 	if err != nil {
 		return err
@@ -46,7 +47,7 @@ func destroyRandomOSD(ctx context.Context, c ceph.Cluster) error {
 	return c.DestroyOSD(ctx, id)
 }
 
-func randomlyResizeRandomPool(ctx context.Context, c ceph.Cluster) error {
+func randomlyResizeRandomPool(ctx context.Context, c drivers.Cluster) error {
 	pools, err := c.GetPools(ctx)
 	if err != nil {
 		return err
@@ -61,7 +62,7 @@ func randomlyResizeRandomPool(ctx context.Context, c ceph.Cluster) error {
 	return c.ResizePool(ctx, pool.PoolName, uint64(getRandomChoice(10)))
 }
 
-func randomlyChangePGNumForRandomPool(ctx context.Context, c ceph.Cluster) error {
+func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster) error {
 	pools, err := c.GetPools(ctx)
 	if err != nil {
 		return err
@@ -76,11 +77,11 @@ func randomlyChangePGNumForRandomPool(ctx context.Context, c ceph.Cluster) error
 	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(2^getRandomChoice(16)))
 }
 
-func reweightByUtilization(ctx context.Context, c ceph.Cluster) error {
+func reweightByUtilization(ctx context.Context, c drivers.Cluster) error {
 	return c.ReweightByUtilization(ctx)
 }
 
-func createPoolAndPutAmountOfObjects(ctx context.Context, c ceph.Cluster) error {
+func createPoolAndPutAmountOfObjects(ctx context.Context, c drivers.Cluster) error {
 	poolName := "test-pool-" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	if err := c.CreateDefaultPool(ctx, poolName); err != nil {
 		return err
@@ -107,14 +108,14 @@ func createPoolAndPutAmountOfObjects(ctx context.Context, c ceph.Cluster) error 
 	return nil
 }
 
-func setRandomNearFullRatio(ctx context.Context, c ceph.Cluster) error {
+func setRandomNearFullRatio(ctx context.Context, c drivers.Cluster) error {
 	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
 }
 
-func setRandomBackfillfullRatio(ctx context.Context, c ceph.Cluster) error {
+func setRandomBackfillfullRatio(ctx context.Context, c drivers.Cluster) error {
 	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
 }
 
-func setRandomFullRatio(ctx context.Context, c ceph.Cluster) error {
+func setRandomFullRatio(ctx context.Context, c drivers.Cluster) error {
 	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
 }
