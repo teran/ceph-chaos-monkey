@@ -21,6 +21,11 @@ func (m *ClusterMock) GetOSDs(context.Context) ([]OSD, error) {
 	return args.Get(0).([]OSD), args.Error(1)
 }
 
+func (m *ClusterMock) GetOSDIDs(ctx context.Context) ([]uint64, error) {
+	args := m.Called()
+	return args.Get(0).([]uint64), args.Error(1)
+}
+
 func (m *ClusterMock) GetMons(context.Context) ([]Mon, error) {
 	args := m.Called()
 	return args.Get(0).([]Mon), args.Error(1)
