@@ -39,3 +39,17 @@ type Pool struct {
 	QuotaMaxObjects    uint64 `json:"quota_max_objects"`
 	ErasureCodeProfile string `json:"erasure_code_profile"`
 }
+
+type Flag string
+
+const (
+	FlagNoOut       Flag = "noout"
+	FlagNoIn        Flag = "noin"
+	FlagNoRecover   Flag = "norecover"
+	FlagNoScrub     Flag = "noscrub"
+	FlagNoDeepScrub Flag = "nodeep-scrub"
+	FlagPause       Flag = "pause"
+	FlagNoBackfill  Flag = "nobackfill"
+	FlagNoUp        Flag = "noup"
+	FlagNoRebalance Flag = "norebalance"
+)

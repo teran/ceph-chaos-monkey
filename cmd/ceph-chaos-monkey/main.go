@@ -9,8 +9,9 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
-	"github.com/teran/ceph-chaos-monkey/ceph"
+	cephShellDriver "github.com/teran/ceph-chaos-monkey/ceph/drivers/shell"
 	"github.com/teran/ceph-chaos-monkey/monkey"
+	"github.com/teran/go-collection/random"
 )
 
 type config struct {
@@ -53,11 +54,11 @@ func main() {
 
 	ctx := context.TODO()
 
-	runner := ceph.NewRunner("/usr/bin/ceph", "/usr/bin/rados")
-	cluster := ceph.New(runner)
+	runner := cephShellDriver.NewRunner("/usr/bin/ceph", "/usr/bin/rados")
+	cluster := cephShellDriver.New(runner)
 	printer := monkey.NewPrinter()
 
-	m := monkey.New(cluster, printer, time.Duration(interval)*time.Second, time.Duration(duration)*time.Second)
+	m := monkey.New(cluster, random.GetRand(), printer, time.Duration(interval)*time.Second, time.Duration(duration)*time.Second)
 	if err := m.Run(ctx); err != nil {
 		panic(err)
 	}

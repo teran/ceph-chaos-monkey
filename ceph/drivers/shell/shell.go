@@ -1,4 +1,4 @@
-package ceph
+package shell
 
 import (
 	"context"
@@ -6,59 +6,24 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/teran/ceph-chaos-monkey/ceph"
+	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
-
-type Flag string
-
-const (
-	FlagNoOut       Flag = "noout"
-	FlagNoIn        Flag = "noin"
-	FlagNoRecover   Flag = "norecover"
-	FlagNoScrub     Flag = "noscrub"
-	FlagNoDeepScrub Flag = "nodeep-scrub"
-	FlagPause       Flag = "pause"
-	FlagNoBackfill  Flag = "nobackfill"
-	FlagNoUp        Flag = "noup"
-	FlagNoRebalance Flag = "norebalance"
-)
-
-type Cluster interface {
-	GetOSDs(ctx context.Context) ([]OSD, error)
-	GetOSDIDs(ctx context.Context) ([]uint64, error)
-	GetMons(ctx context.Context) ([]Mon, error)
-
-	DestroyOSD(ctx context.Context, id uint64) error
-	StopOSDDaemon(ctx context.Context, id uint64) error
-
-	SetFlag(ctx context.Context, flag Flag) error
-	UnsetFlag(ctx context.Context, flag Flag) error
-
-	GetPools(ctx context.Context) ([]Pool, error)
-	CreateDefaultPool(ctx context.Context, name string) error
-	ResizePool(ctx context.Context, name string, size uint64) error
-	ChangePoolPGNum(ctx context.Context, name string, pgs uint64) error
-	ReweightByUtilization(ctx context.Context) error
-
-	CreateRADOSObject(ctx context.Context, pool, objectName string, data []byte) error
-
-	SetNearFullRatio(ctx context.Context, value float64) error
-	SetBackfillfullRatio(ctx context.Context, value float64) error
-	SetFullRatio(ctx context.Context, value float64) error
-}
 
 type cluster struct {
 	runner Runner
 }
 
-func New(runner Runner) Cluster {
+func New(runner Runner) drivers.Cluster {
 	return &cluster{
 		runner: runner,
 	}
 }
 
-func (c *cluster) GetOSDs(ctx context.Context) ([]OSD, error) {
+func (c *cluster) GetOSDs(ctx context.Context) ([]ceph.OSD, error) {
 	type osds struct {
-		OSDs []OSD `json:"OSDs"`
+		OSDs []ceph.OSD `json:"OSDs"`
 	}
 
 	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "status", "--format=json")
@@ -90,10 +55,10 @@ func (c *cluster) GetOSDIDs(ctx context.Context) ([]uint64, error) {
 	return data, nil
 }
 
-func (c *cluster) GetMons(ctx context.Context) ([]Mon, error) {
+func (c *cluster) GetMons(ctx context.Context) ([]ceph.Mon, error) {
 	type mons struct {
 		// ...
-		Mons []Mon `json:"mons"`
+		Mons []ceph.Mon `json:"mons"`
 		// ...
 	}
 
@@ -111,14 +76,14 @@ func (c *cluster) GetMons(ctx context.Context) ([]Mon, error) {
 	return data.Mons, nil
 }
 
-func (c *cluster) GetPools(ctx context.Context) ([]Pool, error) {
+func (c *cluster) GetPools(ctx context.Context) ([]ceph.Pool, error) {
 	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "pool", "ls", "detail", "--format=json")
 	if err != nil {
 		log.Debugf("command stderr: %s", string(stderr))
 		return nil, err
 	}
 
-	data := []Pool{}
+	data := []ceph.Pool{}
 	if err := json.Unmarshal(stdout, &data); err != nil {
 		return nil, err
 	}
@@ -164,7 +129,7 @@ func (c *cluster) StopOSDDaemon(ctx context.Context, id uint64) error {
 	return nil
 }
 
-func (c *cluster) SetFlag(ctx context.Context, flag Flag) error {
+func (c *cluster) SetFlag(ctx context.Context, flag ceph.Flag) error {
 	_, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "set", string(flag))
 	if err != nil {
 		log.Debugf("command stderr: %s", string(stderr))
@@ -174,7 +139,7 @@ func (c *cluster) SetFlag(ctx context.Context, flag Flag) error {
 	return nil
 }
 
-func (c *cluster) UnsetFlag(ctx context.Context, flag Flag) error {
+func (c *cluster) UnsetFlag(ctx context.Context, flag ceph.Flag) error {
 	_, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "unset", string(flag))
 	if err != nil {
 		log.Debugf("command stderr: %s", string(stderr))
