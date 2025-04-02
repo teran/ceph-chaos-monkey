@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/teran/ceph-chaos-monkey/ceph"
 	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )

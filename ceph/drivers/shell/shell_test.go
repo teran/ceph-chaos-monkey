@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
 	"github.com/teran/ceph-chaos-monkey/ceph"
 	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )

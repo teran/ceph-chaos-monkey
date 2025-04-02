@@ -9,6 +9,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/teran/go-collection/random"
+
 	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
 
@@ -21,14 +23,16 @@ type monkey struct {
 	duration time.Duration
 	interval time.Duration
 	printer  Printer
+	rnd      random.Random
 }
 
-func New(cluster drivers.Cluster, printer Printer, interval time.Duration, duration time.Duration) Monkey {
+func New(cluster drivers.Cluster, rnd random.Random, printer Printer, interval time.Duration, duration time.Duration) Monkey {
 	return &monkey{
 		cluster:  cluster,
 		duration: duration,
 		interval: interval,
 		printer:  printer,
+		rnd:      rnd,
 	}
 }
 
@@ -109,7 +113,7 @@ you're running ceph-chaos-monkey.`)
 }
 
 func (m *monkey) doSomeFuss(ctx context.Context) error {
-	cases := []func(context.Context, drivers.Cluster) error{
+	cases := []func(context.Context, drivers.Cluster, random.Random) error{
 		setRandomFlag, unsetRandomFlag,
 		destroyRandomOSD,
 		randomlyResizeRandomPool, randomlyChangePGNumForRandomPool,
@@ -118,9 +122,9 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 		setRandomNearFullRatio, setRandomBackfillfullRatio, setRandomFullRatio,
 	}
 
-	fn := cases[getRandomChoice(len(cases))]
+	fn := cases[m.rnd.Intn(len(cases))]
 
-	return fn(ctx, m.cluster)
+	return fn(ctx, m.cluster, m.rnd)
 }
 
 func (m *monkey) preflightCheck(ctx context.Context) bool {

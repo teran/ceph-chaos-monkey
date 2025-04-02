@@ -5,8 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"math"
 	"strconv"
 	"time"
+
+	"github.com/teran/go-collection/random"
 
 	"github.com/teran/ceph-chaos-monkey/ceph"
 	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
@@ -24,15 +27,15 @@ var cephFlags = []ceph.Flag{
 	ceph.FlagPause,
 }
 
-func setRandomFlag(ctx context.Context, c drivers.Cluster) error {
-	return c.SetFlag(ctx, cephFlags[getRandomChoice(len(cephFlags))])
+func setRandomFlag(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	return c.SetFlag(ctx, cephFlags[rnd.Intn(len(cephFlags))])
 }
 
-func unsetRandomFlag(ctx context.Context, c drivers.Cluster) error {
-	return c.UnsetFlag(ctx, cephFlags[getRandomChoice(len(cephFlags))])
+func unsetRandomFlag(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	return c.UnsetFlag(ctx, cephFlags[rnd.Intn(len(cephFlags))])
 }
 
-func destroyRandomOSD(ctx context.Context, c drivers.Cluster) error {
+func destroyRandomOSD(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
 	ids, err := c.GetOSDIDs(ctx)
 	if err != nil {
 		return err
@@ -42,12 +45,12 @@ func destroyRandomOSD(ctx context.Context, c drivers.Cluster) error {
 		return errors.New("no OSDs are present in the cluster")
 	}
 
-	id := ids[getRandomChoice(len(ids))]
+	id := ids[rnd.Intn(len(ids))]
 
 	return c.DestroyOSD(ctx, id)
 }
 
-func randomlyResizeRandomPool(ctx context.Context, c drivers.Cluster) error {
+func randomlyResizeRandomPool(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
 	pools, err := c.GetPools(ctx)
 	if err != nil {
 		return err
@@ -57,12 +60,12 @@ func randomlyResizeRandomPool(ctx context.Context, c drivers.Cluster) error {
 		return errors.New("no Pools are present in the cluster")
 	}
 
-	pool := pools[getRandomChoice(len(pools))]
+	pool := pools[rnd.Intn(len(pools))]
 
-	return c.ResizePool(ctx, pool.PoolName, uint64(getRandomChoice(10)))
+	return c.ResizePool(ctx, pool.PoolName, uint64(rnd.Intn(10)))
 }
 
-func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster) error {
+func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
 	pools, err := c.GetPools(ctx)
 	if err != nil {
 		return err
@@ -72,27 +75,27 @@ func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster) er
 		return errors.New("no Pools are present in the cluster")
 	}
 
-	pool := pools[getRandomChoice(len(pools))]
+	pool := pools[rnd.Intn(len(pools))]
 
-	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(2^getRandomChoice(16)))
+	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(rnd.Intn(256)))
 }
 
-func reweightByUtilization(ctx context.Context, c drivers.Cluster) error {
+func reweightByUtilization(ctx context.Context, c drivers.Cluster, _ random.Random) error {
 	return c.ReweightByUtilization(ctx)
 }
 
-func createPoolAndPutAmountOfObjects(ctx context.Context, c drivers.Cluster) error {
-	poolName := "test-pool-" + strconv.FormatInt(time.Now().UnixNano(), 10)
+func createPoolAndPutAmountOfObjects(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	poolName := "test-pool-" + strconv.FormatInt(rnd.Int63n(math.MaxInt64), 10)
 	if err := c.CreateDefaultPool(ctx, poolName); err != nil {
 		return err
 	}
 
 	maxSize := 150 * 1024 * 1024
-	amount := getRandomChoice(50)
+	amount := rnd.Intn(50)
 
 	for i := 0; i < amount; i++ {
-		buf := make([]byte, getRandomChoice(maxSize))
-		if _, err := rng.Read(buf); err != nil {
+		buf := make([]byte, rnd.Intn(maxSize))
+		if _, err := rnd.Read(buf); err != nil {
 			return err
 		}
 
@@ -108,14 +111,14 @@ func createPoolAndPutAmountOfObjects(ctx context.Context, c drivers.Cluster) err
 	return nil
 }
 
-func setRandomNearFullRatio(ctx context.Context, c drivers.Cluster) error {
-	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
+func setRandomNearFullRatio(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	return c.SetNearFullRatio(ctx, rnd.Float64())
 }
 
-func setRandomBackfillfullRatio(ctx context.Context, c drivers.Cluster) error {
-	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
+func setRandomBackfillfullRatio(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	return c.SetNearFullRatio(ctx, rnd.Float64())
 }
 
-func setRandomFullRatio(ctx context.Context, c drivers.Cluster) error {
-	return c.SetNearFullRatio(ctx, float64(getRandomChoice(100))/100.0)
+func setRandomFullRatio(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	return c.SetNearFullRatio(ctx, rnd.Float64())
 }

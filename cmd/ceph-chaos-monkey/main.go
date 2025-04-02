@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	cephShellDriver "github.com/teran/ceph-chaos-monkey/ceph/drivers/shell"
 	"github.com/teran/ceph-chaos-monkey/monkey"
+	"github.com/teran/go-collection/random"
 )
 
 type config struct {
@@ -57,7 +58,7 @@ func main() {
 	cluster := cephShellDriver.New(runner)
 	printer := monkey.NewPrinter()
 
-	m := monkey.New(cluster, printer, time.Duration(interval)*time.Second, time.Duration(duration)*time.Second)
+	m := monkey.New(cluster, random.GetRand(), printer, time.Duration(interval)*time.Second, time.Duration(duration)*time.Second)
 	if err := m.Run(ctx); err != nil {
 		panic(err)
 	}
