@@ -53,3 +53,20 @@ const (
 	FlagNoUp        Flag = "noup"
 	FlagNoRebalance Flag = "norebalance"
 )
+
+type HealthCheckSummary struct {
+	Message string `json:"message"`
+	Count   int    `json:"count"`
+}
+
+type HealthCheck struct {
+	Severity string             `json:"severity"`
+	Summary  HealthCheckSummary `json:"summary"`
+	Muted    bool               `json:"muted"`
+}
+
+type Health struct {
+	Status string                 `json:"status"`
+	Checks map[string]HealthCheck `json:"checks"`
+	Mutes  []any                  `json:"mutes"`
+}

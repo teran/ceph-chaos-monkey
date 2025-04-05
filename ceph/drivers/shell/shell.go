@@ -21,6 +21,17 @@ func New(runner Runner) drivers.Cluster {
 	}
 }
 
+func (c *cluster) GetHealth(ctx context.Context) (ceph.Health, error) {
+	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "health", "--format=json")
+	if err != nil {
+		log.Debugf("command stderr: %s", string(stderr))
+		return ceph.Health{}, err
+	}
+
+	data := ceph.Health{}
+	return data, json.Unmarshal(stdout, &data)
+}
+
 func (c *cluster) GetOSDs(ctx context.Context) ([]ceph.OSD, error) {
 	type osds struct {
 		OSDs []ceph.OSD `json:"OSDs"`
