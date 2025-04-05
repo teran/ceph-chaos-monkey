@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/teran/ceph-chaos-monkey/ceph"
 	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
@@ -22,9 +20,8 @@ func New(runner Runner) drivers.Cluster {
 }
 
 func (c *cluster) GetHealth(ctx context.Context) (ceph.Health, error) {
-	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "health", "--format=json")
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "health", "--format=json")
 	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
 		return ceph.Health{}, err
 	}
 
@@ -37,9 +34,8 @@ func (c *cluster) GetOSDs(ctx context.Context) ([]ceph.OSD, error) {
 		OSDs []ceph.OSD `json:"OSDs"`
 	}
 
-	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "status", "--format=json")
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "status", "--format=json")
 	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
 		return nil, err
 	}
 
@@ -52,9 +48,8 @@ func (c *cluster) GetOSDs(ctx context.Context) ([]ceph.OSD, error) {
 }
 
 func (c *cluster) GetOSDIDs(ctx context.Context) ([]uint64, error) {
-	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "ls", "--format=json")
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "ls", "--format=json")
 	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
 		return nil, err
 	}
 
@@ -73,9 +68,8 @@ func (c *cluster) GetMons(ctx context.Context) ([]ceph.Mon, error) {
 		// ...
 	}
 
-	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "mon", "dump", "--format=json")
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "mon", "dump", "--format=json")
 	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
 		return nil, err
 	}
 
@@ -88,9 +82,8 @@ func (c *cluster) GetMons(ctx context.Context) ([]ceph.Mon, error) {
 }
 
 func (c *cluster) GetPools(ctx context.Context) ([]ceph.Pool, error) {
-	stdout, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "pool", "ls", "detail", "--format=json")
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "pool", "ls", "detail", "--format=json")
 	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
 		return nil, err
 	}
 
@@ -131,33 +124,18 @@ func (c *cluster) DestroyOSD(ctx context.Context, id uint64) error {
 }
 
 func (c *cluster) StopOSDDaemon(ctx context.Context, id uint64) error {
-	_, stderr, err := c.runner.RunCephBinary(ctx, nil, "orch", "daemon", "stop", "osd."+strconv.FormatUint(id, 10))
-	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
-		return err
-	}
-
-	return nil
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "orch", "daemon", "stop", "osd."+strconv.FormatUint(id, 10))
+	return err
 }
 
 func (c *cluster) SetFlag(ctx context.Context, flag ceph.Flag) error {
-	_, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "set", string(flag))
-	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
-		return err
-	}
-
-	return nil
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "set", string(flag))
+	return err
 }
 
 func (c *cluster) UnsetFlag(ctx context.Context, flag ceph.Flag) error {
-	_, stderr, err := c.runner.RunCephBinary(ctx, nil, "osd", "unset", string(flag))
-	if err != nil {
-		log.Debugf("command stderr: %s", string(stderr))
-		return err
-	}
-
-	return nil
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "unset", string(flag))
+	return err
 }
 
 func (c *cluster) CreateDefaultPool(ctx context.Context, name string) error {
