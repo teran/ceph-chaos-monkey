@@ -7,6 +7,8 @@ import (
 )
 
 type Cluster interface {
+	GetHealth(ctx context.Context) (ceph.Health, error)
+
 	GetOSDs(ctx context.Context) ([]ceph.OSD, error)
 	GetOSDIDs(ctx context.Context) ([]uint64, error)
 	GetMons(ctx context.Context) ([]ceph.Mon, error)

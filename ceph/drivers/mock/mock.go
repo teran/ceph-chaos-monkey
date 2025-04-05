@@ -18,6 +18,11 @@ func New() *Mock {
 	return &Mock{}
 }
 
+func (m *Mock) GetHealth(context.Context) (ceph.Health, error) {
+	args := m.Called()
+	return args.Get(0).(ceph.Health), args.Error(1)
+}
+
 func (m *Mock) GetOSDs(context.Context) ([]ceph.OSD, error) {
 	args := m.Called()
 	return args.Get(0).([]ceph.OSD), args.Error(1)

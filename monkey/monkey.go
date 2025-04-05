@@ -18,12 +18,24 @@ type Monkey interface {
 	Run(ctx context.Context) error
 }
 
+type JournalEntry struct {
+	Timestamp time.Time
+	Entry     string
+}
+
 type monkey struct {
 	cluster  drivers.Cluster
 	duration time.Duration
 	interval time.Duration
 	printer  Printer
 	rnd      random.Random
+
+	journal []JournalEntry
+}
+
+type fuss struct {
+	name string
+	fn   func(context.Context, drivers.Cluster, random.Random) error
 }
 
 func New(cluster drivers.Cluster, rnd random.Random, printer Printer, interval time.Duration, duration time.Duration) Monkey {
@@ -85,6 +97,8 @@ you're running ceph-chaos-monkey.`)
 	defer cancel()
 
 	ticker := time.NewTicker(m.interval)
+
+outer:
 	for {
 		select {
 		case <-ctx.Done():
@@ -92,9 +106,7 @@ you're running ceph-chaos-monkey.`)
 				return err
 			}
 
-			m.printer.Println("Game is over! Go check your cluster if it's still alive :-)")
-
-			return nil
+			break outer
 		case <-ticker.C:
 			m.printer.Println("Tick! Running something dangerous in the cluster ...")
 			if err := m.doSomeFuss(ctx); err != nil {
@@ -104,30 +116,91 @@ you're running ceph-chaos-monkey.`)
 					continue
 				}
 
-				m.printer.Println("Game is over! Go check your cluster if it's still alive :-)")
-
-				return nil
+				break outer
 			}
 		}
 	}
+
+	m.printer.Println()
+	m.printer.Println("Game is over! Go check your cluster if it's still alive :-)")
+	m.printer.Println()
+	m.printer.Println("Here's the journal of your adventure during the game:")
+	for _, j := range m.journal {
+		fmt.Printf("- %s: %s\n", j.Timestamp.Format(time.RFC3339), j.Entry)
+	}
+
+	return nil
 }
 
 func (m *monkey) doSomeFuss(ctx context.Context) error {
-	cases := []func(context.Context, drivers.Cluster, random.Random) error{
-		setRandomFlag, unsetRandomFlag,
-		destroyRandomOSD,
-		randomlyResizeRandomPool, randomlyChangePGNumForRandomPool,
-		reweightByUtilization,
-		createPoolAndPutAmountOfObjects,
-		setRandomNearFullRatio, setRandomBackfillfullRatio, setRandomFullRatio,
+	cases := []fuss{
+		{
+			name: "set random flag",
+			fn:   setRandomFlag,
+		},
+		{
+			name: "unset random flag",
+			fn:   unsetRandomFlag,
+		},
+		{
+			name: "destroy random OSD",
+			fn:   destroyRandomOSD,
+		},
+		{
+			name: "randomly resize random pool",
+			fn:   randomlyResizeRandomPool,
+		},
+		{
+			name: "randomly change pg_num for random pool",
+			fn:   randomlyChangePGNumForRandomPool,
+		},
+		{
+			name: "run reweight-by-utilization",
+			fn:   reweightByUtilization,
+		},
+		{
+			name: "create new pool and put amount of objects",
+			fn:   createPoolAndPutAmountOfObjects,
+		},
+		{
+			name: "set random value for nearfull-ratio",
+			fn:   setRandomNearFullRatio,
+		},
+		{
+			name: "set random value for backfillfull-ratio",
+			fn:   setRandomBackfillfullRatio,
+		},
+		{
+			name: "set random value for full-ratio",
+			fn:   setRandomFullRatio,
+		},
 	}
 
-	fn := cases[m.rnd.Intn(len(cases))]
+	c := cases[m.rnd.Intn(len(cases))]
 
-	return fn(ctx, m.cluster, m.rnd)
+	m.journal = append(m.journal, JournalEntry{
+		Timestamp: time.Now(),
+		Entry:     c.name,
+	})
+
+	err := c.fn(ctx, m.cluster, m.rnd)
+	if err != context.DeadlineExceeded {
+		m.journal = append(m.journal, JournalEntry{
+			Timestamp: time.Now(),
+			Entry:     fmt.Sprintf("cluster operations are failing (during %s)", c.name),
+		})
+	}
+
+	return c.fn(ctx, m.cluster, m.rnd)
 }
 
 func (m *monkey) preflightCheck(ctx context.Context) bool {
+	health, err := m.cluster.GetHealth(ctx)
+	if err != nil {
+		m.printer.Println("Can't do a preflight check, sorry ...")
+		return false
+	}
+
 	osds, err := m.cluster.GetOSDs(ctx)
 	if err != nil {
 		m.printer.Println("Can't do a preflight check, sorry ...")
@@ -148,6 +221,14 @@ func (m *monkey) preflightCheck(ctx context.Context) bool {
 		m.printer.Printf("Total cluster space must be <=500GB, you have: %d bytes\n", total)
 		return false
 	}
+
+	m.journal = append(m.journal, JournalEntry{
+		Timestamp: time.Now(),
+		Entry: fmt.Sprintf(
+			"your Ceph cluster is up and running in %s state with %d OSDs and %d bytes total raw space",
+			health.Status, len(osds), total,
+		),
+	})
 
 	return true
 }
