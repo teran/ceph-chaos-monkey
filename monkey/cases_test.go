@@ -123,6 +123,19 @@ func (s *cephTestSuite) TestSetRandomFullRatio() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestRemoveMonitor() {
+	s.cluster.On("GetMons").Return([]ceph.Mon{
+		{Name: "test1"},
+		{Name: "test2"},
+		{Name: "test3"},
+	}, nil).Once()
+	s.rnd.On("Intn", 3).Return(1).Once()
+	s.cluster.On("RemoveMonitor", "test2").Return(nil).Once()
+
+	err := removeRandomMonitor(s.ctx, s.cluster, s.rnd)
+	s.Require().NoError(err)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite
