@@ -4,62 +4,77 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
-	"time"
 
-	"github.com/kelseyhightower/envconfig"
+	kingpin "github.com/alecthomas/kingpin/v2"
 	log "github.com/sirupsen/logrus"
+	"github.com/teran/go-collection/random"
+
 	cephShellDriver "github.com/teran/ceph-chaos-monkey/ceph/drivers/shell"
 	"github.com/teran/ceph-chaos-monkey/monkey"
-	"github.com/teran/go-collection/random"
 )
 
-type config struct {
-	LogLevel log.Level `envconfig:"LOG_LEVEL" default:"error"`
-}
+const (
+	appName = "ceph-chaos-monkey"
+
+	runCmd     = "run"
+	versionCmd = "version"
+)
+
+var (
+	appVersion     = "n/a (dev build)"
+	buildTimestamp = "undefined"
+
+	app = kingpin.New(appName, "Ceph Chaos Monkey")
+
+	isTrace = app.
+		Flag("trace", "set verbosity level to trace").
+		Bool()
+
+	cephBinaryPath = app.
+			Flag("ceph-binary", "path to the ceph binary").
+			Default("/usr/bin/ceph").
+			String()
+
+	radosBinaryPath = app.
+			Flag("rados-binary", "path to the rados binary").
+			Default("/usr/bin/rados").
+			String()
+
+	isRun        = app.Command(runCmd, "run the game")
+	fussInterval = isRun.
+			Flag("fuss-interval", "set fuss interval i.e. how often to trigger chaos behavior. Example: 2m for 2 minutes").
+			Required().
+			Duration()
+
+	gameDuration = isRun.
+			Flag("game-duration", "set game duration i.e. overall time for chaos monkey to destroy Ceph cluster. Example 10m for 10 minutes").
+			Required().
+			Duration()
+
+	_ = app.Command(versionCmd, "print version and exit")
+)
 
 func main() {
-	cfg := config{}
-	envconfig.MustProcess("", &cfg)
-
-	log.SetLevel(cfg.LogLevel)
-
-	if len(os.Args) < 3 {
-		fmt.Printf("Usage: %s FUSS_INTERVAL GAME_DURATION\n", os.Args[0])
-		fmt.Println("Both FUSS_INTERVAL and GAME_DURATION are in seconds")
-		os.Exit(1)
-	}
-
-	interval, err := strconv.ParseUint(os.Args[1], 10, 64)
-	if err != nil {
-		fmt.Printf("Incorrect interval value, must be integer: %s", os.Args[1])
-		os.Exit(1)
-	}
-
-	if interval < 45 {
-		fmt.Println("Please set interval >=45s to allow Ceph to react and give you a proper status.")
-		os.Exit(1)
-	}
-
-	duration, err := strconv.ParseUint(os.Args[2], 10, 64)
-	if err != nil {
-		fmt.Printf("Incorrect duration value, must be integer: %s", os.Args[1])
-		os.Exit(1)
-	}
-
-	if duration > 60*60 {
-		fmt.Println("Please avoid duration >=1h to have some time to analyze what you've done and what actually happened")
-		os.Exit(1)
-	}
-
 	ctx := context.TODO()
+	appCmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 
-	runner := cephShellDriver.NewRunner("/usr/bin/ceph", "/usr/bin/rados")
-	cluster := cephShellDriver.New(runner)
-	printer := monkey.NewPrinter()
+	if isTrace != nil && *isTrace {
+		log.SetLevel(log.TraceLevel)
+	}
 
-	m := monkey.New(cluster, random.GetRand(), printer, time.Duration(interval)*time.Second, time.Duration(duration)*time.Second)
-	if err := m.Run(ctx); err != nil {
-		panic(err)
+	switch appCmd {
+	case runCmd:
+		runner := cephShellDriver.NewRunner(*cephBinaryPath, *radosBinaryPath)
+		cluster := cephShellDriver.New(runner)
+		printer := monkey.NewPrinter()
+
+		m := monkey.New(cluster, random.GetRand(), printer, *fussInterval, *gameDuration)
+		if err := m.Run(ctx); err != nil {
+			panic(err)
+		}
+		return
+	case versionCmd:
+		fmt.Printf("%s v%s (built @ %s)\n", appName, appVersion, buildTimestamp)
+		os.Exit(1)
 	}
 }
