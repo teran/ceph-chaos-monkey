@@ -15,6 +15,9 @@ import (
 
 const (
 	appName = "ceph-chaos-monkey"
+
+	runCmd     = "run"
+	versionCmd = "version"
 )
 
 var (
@@ -37,7 +40,7 @@ var (
 			Default("/usr/bin/rados").
 			String()
 
-	isRun        = app.Command("run", "run the game")
+	isRun        = app.Command(runCmd, "run the game")
 	fussInterval = isRun.
 			Flag("fuss-interval", "set fuss interval i.e. how often to trigger chaos behavior. Example: 2m for 2 minutes").
 			Required().
@@ -48,7 +51,7 @@ var (
 			Required().
 			Duration()
 
-	isVersion = app.Command("version", "print version and exit")
+	_ = app.Command(versionCmd, "print version and exit")
 )
 
 func main() {
@@ -60,7 +63,7 @@ func main() {
 	}
 
 	switch appCmd {
-	case "run":
+	case runCmd:
 		runner := cephShellDriver.NewRunner(*cephBinaryPath, *radosBinaryPath)
 		cluster := cephShellDriver.New(runner)
 		printer := monkey.NewPrinter()
@@ -70,7 +73,7 @@ func main() {
 			panic(err)
 		}
 		return
-	case "version":
+	case versionCmd:
 		fmt.Printf("%s v%s (built @ %s)\n", appName, appVersion, buildTimestamp)
 		os.Exit(1)
 	}
