@@ -162,3 +162,8 @@ func (c *cluster) SetFullRatio(ctx context.Context, value float64) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "set-full-ratio", strconv.FormatFloat(value, 'f', -1, 64))
 	return err
 }
+
+func (c *cluster) RemoveMonitor(ctx context.Context, name string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "mon", "remove", name)
+	return err
+}

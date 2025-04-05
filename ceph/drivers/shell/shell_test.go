@@ -222,6 +222,13 @@ func (s *cephTestSuite) TestSetFullRatio() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestRemoveMonitor() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"mon", "remove", "test"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.RemoveMonitor(s.ctx, "test")
+	s.Require().NoError(err)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite

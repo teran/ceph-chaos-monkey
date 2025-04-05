@@ -174,6 +174,10 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 			name: "set random value for full-ratio",
 			fn:   setRandomFullRatio,
 		},
+		{
+			name: "remove random monitor",
+			fn:   removeRandomMonitor,
+		},
 	}
 
 	c := cases[m.rnd.Intn(len(cases))]

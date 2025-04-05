@@ -122,3 +122,14 @@ func setRandomBackfillfullRatio(ctx context.Context, c drivers.Cluster, rnd rand
 func setRandomFullRatio(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
 	return c.SetNearFullRatio(ctx, rnd.Float64())
 }
+
+func removeRandomMonitor(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	mons, err := c.GetMons(ctx)
+	if err != nil {
+		return err
+	}
+
+	mon := mons[rnd.Intn(len(mons))]
+
+	return c.RemoveMonitor(ctx, mon.Name)
+}
