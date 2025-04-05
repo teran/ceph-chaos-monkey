@@ -15,8 +15,27 @@ you're running ceph-chaos-monkey.
 ## Usage
 
 ```shell
-Usage: ./ceph-chaos-monkey FUSS_INTERVAL GAME_DURATION
-Both FUSS_INTERVAL and GAME_DURATION are in seconds
+usage: ceph-chaos-monkey [<flags>] <command> [<args> ...]
+
+Ceph Chaos Monkey
+
+
+Flags:
+  --[no-]help                    Show context-sensitive help (also try --help-long and --help-man).
+  --[no-]trace                   set verbosity level to trace
+  --ceph-binary="/usr/bin/ceph"  path to the ceph binary
+  --rados-binary="/usr/bin/rados"
+                                 path to the rados binary
+
+Commands:
+help [<command>...]
+    Show help.
+
+run --fuss-interval=FUSS-INTERVAL --game-duration=GAME-DURATION
+    run the game
+
+version
+    print version and exit
 ```
 
 ceph-chaos-monkey distributed as a container image so you could simply update
