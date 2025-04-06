@@ -121,7 +121,6 @@ outer:
 			if err := m.doSomeFuss(ctx); err != nil {
 				if err != context.DeadlineExceeded {
 					log.Debugf("error doSomeFuss(): %s", err)
-					m.printer.Println("Hm... I'm starting getting errors from cluster, I'm leading! :-)")
 					continue
 				}
 
