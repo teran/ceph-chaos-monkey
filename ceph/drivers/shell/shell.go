@@ -148,6 +148,39 @@ func (c *cluster) CreateRADOSObject(ctx context.Context, pool, objectName string
 	return err
 }
 
+func (c *cluster) ReadRADOSObject(ctx context.Context, pool, objectName string) ([]byte, error) {
+	stdout, _, err := c.runner.RunRadosBinary(ctx, nil, "get", "--pool="+pool, objectName, "-")
+	if err != nil {
+		return nil, err
+	}
+
+	return stdout, nil
+}
+
+func (c *cluster) ListRADOSObjects(ctx context.Context, pool string) ([]string, error) {
+	type object struct {
+		Namespace string `json:"namespace"`
+		Name      string `json:"name"`
+	}
+
+	stdout, _, err := c.runner.RunRadosBinary(ctx, nil, "ls", "--pool="+pool, "--format=json")
+	if err != nil {
+		return nil, err
+	}
+
+	data := []object{}
+	if err := json.Unmarshal(stdout, &data); err != nil {
+		return nil, err
+	}
+
+	out := []string{}
+	for _, v := range data {
+		out = append(out, v.Name)
+	}
+
+	return out, nil
+}
+
 func (c *cluster) SetNearFullRatio(ctx context.Context, value float64) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "set-nearfull-ratio", strconv.FormatFloat(value, 'f', -1, 64))
 	return err

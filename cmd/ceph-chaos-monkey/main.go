@@ -67,8 +67,9 @@ func main() {
 		runner := cephShellDriver.NewRunner(*cephBinaryPath, *radosBinaryPath)
 		cluster := cephShellDriver.New(runner)
 		printer := monkey.NewPrinter()
+		stats := monkey.NewStats()
 
-		m := monkey.New(cluster, random.GetRand(), printer, *fussInterval, *gameDuration)
+		m := monkey.New(cluster, random.GetRand(), printer, stats, *fussInterval, *gameDuration)
 		if err := m.Run(ctx); err != nil {
 			panic(err)
 		}

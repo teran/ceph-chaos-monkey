@@ -88,6 +88,16 @@ func (m *Mock) CreateRADOSObject(ctx context.Context, pool, objectName string, d
 	return args.Error(0)
 }
 
+func (m *Mock) ReadRADOSObject(_ context.Context, pool, objectName string) ([]byte, error) {
+	args := m.Called(pool, objectName)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+func (m *Mock) ListRADOSObjects(_ context.Context, pool string) ([]string, error) {
+	args := m.Called(pool)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 func (m *Mock) SetNearFullRatio(ctx context.Context, value float64) error {
 	args := m.Called(value)
 	return args.Error(0)
