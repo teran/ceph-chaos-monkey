@@ -233,6 +233,22 @@ func (s *cephTestSuite) TestRemoveMonitor() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestReadRADOSObject() {
+	s.runnerMock.On("RunRadosBinary", []byte(nil), []string{"get", "--pool=test-pool", "object-name", "-"}).Return([]byte("test data"), []byte{}, nil).Once()
+
+	data, err := s.cluster.ReadRADOSObject(s.ctx, "test-pool", "object-name")
+	s.Require().NoError(err)
+	s.Require().Equal("test data", string(data))
+}
+
+func (s *cephTestSuite) TestListRADOSObjects() {
+	s.runnerMock.On("RunRadosBinary", []byte(nil), []string{"ls", "--pool=test-pool", "--format=json"}).Return([]byte(`[{"name":"obj1"},{"name":"obj2"}]`), []byte{}, nil).Once()
+
+	pools, err := s.cluster.ListRADOSObjects(s.ctx, "test-pool")
+	s.Require().NoError(err)
+	s.Require().Equal([]string{"obj1", "obj2"}, pools)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite
