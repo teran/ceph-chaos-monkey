@@ -2,8 +2,6 @@ package monkey
 
 import (
 	"context"
-	"math"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -68,34 +66,6 @@ func (s *cephTestSuite) TestReweightByUtilization() {
 	s.cluster.On("ReweightByUtilization").Return(nil).Once()
 
 	err := reweightByUtilization(s.ctx, s.cluster, s.rnd)
-	s.Require().NoError(err)
-}
-
-func (s *cephTestSuite) TestCreatePoolAndPutAmountOfObjects() {
-	poolNameEntropy := int64(1234567890)
-	bufSize := 1024
-	amountOfObjects := 2
-
-	poolName := "test-pool-" + strconv.FormatInt(1234567890, 10)
-	s.rnd.On("Int63n", int64(math.MaxInt64)).Return(poolNameEntropy).Once()
-	s.rnd.On("Intn", 50).Return(amountOfObjects).Once()
-	s.rnd.On("Intn", 150*1024*1024).Return(bufSize).Times(amountOfObjects)
-
-	buf := make([]byte, bufSize)
-	copy(buf, []byte("test-data"))
-
-	s.cluster.On("CreateDefaultPool", poolName).Return(nil).Once()
-	s.rnd.On("Read").Return(buf, bufSize, nil).Times(amountOfObjects)
-	s.cluster.
-		On(
-			"CreateRADOSObject",
-			poolName,
-			"ec7c4235ee1166be806c2b7d69a05939726355bbbf8520743f2192b2c930cdaf",
-			buf,
-		).
-		Return(nil).Times(amountOfObjects)
-
-	err := createPoolAndPutAmountOfObjects(s.ctx, s.cluster, s.rnd)
 	s.Require().NoError(err)
 }
 

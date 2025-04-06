@@ -174,10 +174,6 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 			name: "run reweight-by-utilization",
 			fn:   reweightByUtilization,
 		},
-		// {
-		// 	name: "create new pool and put amount of objects",
-		// 	fn:   createPoolAndPutAmountOfObjects,
-		// },
 		{
 			name: "set random value for nearfull-ratio",
 			fn:   setRandomNearFullRatio,
