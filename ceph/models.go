@@ -38,6 +38,10 @@ type Pool struct {
 	QuotaMaxBytes      uint64 `json:"quota_max_bytes"`
 	QuotaMaxObjects    uint64 `json:"quota_max_objects"`
 	ErasureCodeProfile string `json:"erasure_code_profile"`
+	Options            struct {
+		PgNumMax int `json:"pg_num_max"`
+		PgNumMin int `json:"pg_num_min"`
+	} `json:"options,omitempty"`
 }
 
 type Flag string
