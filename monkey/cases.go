@@ -82,7 +82,7 @@ func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster, rn
 		pgNumMax = pool.Options.PgNumMin
 	}
 
-	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(rnd.Intn(pgNumMax)))
+	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(rnd.Intn(pgNumMax)+1))
 }
 
 func reweightByUtilization(ctx context.Context, c drivers.Cluster, _ random.Random) error {
