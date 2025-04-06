@@ -155,6 +155,10 @@ func (s *cephTestSuite) TestGetPools() {
 			QuotaMaxBytes:      0,
 			QuotaMaxObjects:    0,
 			ErasureCodeProfile: "",
+			Options: ceph.PoolOptions{
+				PgNumMax: 32,
+				PgNumMin: 1,
+			},
 		},
 	}, mons)
 }
@@ -219,6 +223,13 @@ func (s *cephTestSuite) TestSetFullRatio() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "set-full-ratio", "0.3"}).Return([]byte{}, []byte{}, nil).Once()
 
 	err := s.cluster.SetFullRatio(s.ctx, 0.3)
+	s.Require().NoError(err)
+}
+
+func (s *cephTestSuite) TestRemoveMonitor() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"mon", "remove", "test"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.RemoveMonitor(s.ctx, "test")
 	s.Require().NoError(err)
 }
 

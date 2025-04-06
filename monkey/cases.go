@@ -77,7 +77,12 @@ func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster, rn
 
 	pool := pools[rnd.Intn(len(pools))]
 
-	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(rnd.Intn(256)))
+	pgNumMax := 256
+	if pool.Options.PgNumMax > 0 {
+		pgNumMax = pool.Options.PgNumMax
+	}
+
+	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(rnd.Intn(pgNumMax)+1))
 }
 
 func reweightByUtilization(ctx context.Context, c drivers.Cluster, _ random.Random) error {
@@ -121,4 +126,15 @@ func setRandomBackfillfullRatio(ctx context.Context, c drivers.Cluster, rnd rand
 
 func setRandomFullRatio(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
 	return c.SetNearFullRatio(ctx, rnd.Float64())
+}
+
+func removeRandomMonitor(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	mons, err := c.GetMons(ctx)
+	if err != nil {
+		return err
+	}
+
+	mon := mons[rnd.Intn(len(mons))]
+
+	return c.RemoveMonitor(ctx, mon.Name)
 }

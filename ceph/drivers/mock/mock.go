@@ -102,3 +102,8 @@ func (m *Mock) SetFullRatio(ctx context.Context, value float64) error {
 	args := m.Called(value)
 	return args.Error(0)
 }
+
+func (m *Mock) RemoveMonitor(_ context.Context, name string) error {
+	args := m.Called(name)
+	return args.Error(0)
+}
