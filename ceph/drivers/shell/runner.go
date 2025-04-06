@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"os/exec"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -58,7 +59,17 @@ func run(ctx context.Context, stdin []byte, cmd string, args ...string) (stdoutC
 
 	outStdout := stdout.Bytes()
 	outStderr := stderr.Bytes()
-	log.Debugf("data received [stdout]: %s\n", string(outStdout))
+
+	isBinaryGetOp := false
+	for _, arg := range args {
+		if arg == "get" {
+			isBinaryGetOp = true
+		}
+	}
+	if !strings.HasSuffix(cmd, "rados") || !isBinaryGetOp {
+		log.Debugf("data received [stdout]: %s\n", string(outStdout))
+	}
+
 	log.Debugf("data received [stderr]: %s\n", string(outStderr))
 	log.Debugf("exit code: %d", c.ProcessState.ExitCode())
 

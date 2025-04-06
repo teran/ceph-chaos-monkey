@@ -3,6 +3,8 @@ package monkey
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
@@ -10,6 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/teran/go-collection/random"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/teran/ceph-chaos-monkey/ceph/drivers"
 )
@@ -24,11 +27,13 @@ type JournalEntry struct {
 }
 
 type monkey struct {
-	cluster  drivers.Cluster
-	duration time.Duration
-	interval time.Duration
-	printer  Printer
-	rnd      random.Random
+	cluster      drivers.Cluster
+	duration     time.Duration
+	interval     time.Duration
+	printer      Printer
+	stats        Stats
+	rnd          random.Random
+	bgIOPoolName string
 
 	journal []JournalEntry
 }
@@ -38,13 +43,15 @@ type fuss struct {
 	fn   func(context.Context, drivers.Cluster, random.Random) error
 }
 
-func New(cluster drivers.Cluster, rnd random.Random, printer Printer, interval time.Duration, duration time.Duration) Monkey {
+func New(cluster drivers.Cluster, rnd random.Random, printer Printer, stats Stats, interval time.Duration, duration time.Duration) Monkey {
 	return &monkey{
-		cluster:  cluster,
-		duration: duration,
-		interval: interval,
-		printer:  printer,
-		rnd:      rnd,
+		cluster:      cluster,
+		duration:     duration,
+		interval:     interval,
+		printer:      printer,
+		rnd:          rnd,
+		stats:        stats,
+		bgIOPoolName: fmt.Sprintf("chaos-monkey-%d", rnd.Uint32()*rnd.Uint32()),
 	}
 }
 
@@ -96,6 +103,8 @@ you're running ceph-chaos-monkey.`)
 	ctx, cancel := context.WithTimeout(ctx, m.duration)
 	defer cancel()
 
+	go func(ctx context.Context) { _ = m.doBackgroundIO(ctx) }(ctx)
+
 	ticker := time.NewTicker(m.interval)
 
 outer:
@@ -112,7 +121,6 @@ outer:
 			if err := m.doSomeFuss(ctx); err != nil {
 				if err != context.DeadlineExceeded {
 					log.Debugf("error doSomeFuss(): %s", err)
-					m.printer.Println("Hm... I'm starting getting errors from cluster, I'm leading! :-)")
 					continue
 				}
 
@@ -123,6 +131,14 @@ outer:
 
 	m.printer.Println()
 	m.printer.Println("Game is over! Go check your cluster if it's still alive :-)")
+	m.printer.Println()
+
+	s := m.stats.Dump()
+	m.printer.Printf("Avg Reads latency = %.3fs\n", s.AvgReadsLatency.Seconds())
+	m.printer.Printf("Avg Writes latency = %.3fs\n", s.AvgWritesLatency.Seconds())
+	m.printer.Printf("Read operations succeeded = %.2f%%\n", s.ReadsSuccessPercent*100)
+	m.printer.Printf("Write operations succeeded = %.2f%%\n", s.ReadsSuccessPercent*100)
+
 	m.printer.Println()
 	m.printer.Println("Here's the journal of your adventure during the game:")
 	for _, j := range m.journal {
@@ -159,10 +175,6 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 			fn:   reweightByUtilization,
 		},
 		{
-			name: "create new pool and put amount of objects",
-			fn:   createPoolAndPutAmountOfObjects,
-		},
-		{
 			name: "set random value for nearfull-ratio",
 			fn:   setRandomNearFullRatio,
 		},
@@ -196,6 +208,125 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 	}
 
 	return c.fn(ctx, m.cluster, m.rnd)
+}
+
+func (m *monkey) doBackgroundIO(ctx context.Context) error {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return m.doBackgroundIOReads(ctx)
+	})
+
+	g.Go(func() error {
+		return m.doBackgroundIOWrites(ctx)
+	})
+
+	return g.Wait()
+}
+
+func (m *monkey) doBackgroundIOReads(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != context.DeadlineExceeded {
+				return err
+			}
+			return nil
+		default:
+			pools, err := m.cluster.GetPools(ctx)
+			if err != nil {
+				log.Debug("error getting pool list")
+				continue
+			}
+
+			isPoolExists := false
+			for _, p := range pools {
+				if p.PoolName == m.bgIOPoolName {
+					isPoolExists = true
+				}
+			}
+
+			if !isPoolExists {
+				log.Tracef("pool %s is not exists yet", m.bgIOPoolName)
+				continue
+			}
+
+			start := time.Now()
+			objs, err := m.cluster.ListRADOSObjects(ctx, m.bgIOPoolName)
+			if err != nil {
+				m.stats.ObserveRead(time.Since(start), err)
+				continue
+			}
+
+			if len(objs) == 0 {
+				continue
+			}
+
+			obj := objs[m.rnd.Intn(len(objs))]
+
+			data, err := m.cluster.ReadRADOSObject(ctx, m.bgIOPoolName, obj)
+			if err != nil {
+				m.stats.ObserveRead(time.Since(start), err)
+				continue
+			}
+
+			hasher := sha256.New()
+			if _, err := hasher.Write(data); err != nil {
+				return err
+			}
+
+			if obj != hex.EncodeToString(hasher.Sum(nil)) {
+				m.stats.ObserveRead(time.Since(start), err)
+				continue
+			}
+			m.stats.ObserveRead(time.Since(start), nil)
+		}
+	}
+}
+
+func (m *monkey) doBackgroundIOWrites(ctx context.Context) error {
+	pools, err := m.cluster.GetPools(ctx)
+	if err != nil {
+		return err
+	}
+
+	isPoolExists := false
+	for _, v := range pools {
+		if v.PoolName == m.bgIOPoolName {
+			isPoolExists = true
+			break
+		}
+	}
+
+	if !isPoolExists {
+		if err := m.cluster.CreateDefaultPool(ctx, m.bgIOPoolName); err != nil {
+			return err
+		}
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != context.DeadlineExceeded {
+				return err
+			}
+			return nil
+		default:
+			buf := make([]byte, m.rnd.Intn(1024*1024*1024))
+			if _, err := m.rnd.Read(buf); err != nil {
+				return err
+			}
+
+			hasher := sha256.New()
+			if _, err := hasher.Write(buf); err != nil {
+				return err
+			}
+
+			start := time.Now()
+			err = m.cluster.CreateRADOSObject(ctx, m.bgIOPoolName, hex.EncodeToString(hasher.Sum(nil)), buf)
+			m.stats.ObserveWrite(time.Since(start), err)
+		}
+	}
 }
 
 func (m *monkey) preflightCheck(ctx context.Context) bool {

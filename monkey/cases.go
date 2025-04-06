@@ -2,12 +2,7 @@ package monkey
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
-	"math"
-	"strconv"
-	"time"
 
 	"github.com/teran/go-collection/random"
 
@@ -87,33 +82,6 @@ func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster, rn
 
 func reweightByUtilization(ctx context.Context, c drivers.Cluster, _ random.Random) error {
 	return c.ReweightByUtilization(ctx)
-}
-
-func createPoolAndPutAmountOfObjects(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
-	poolName := "test-pool-" + strconv.FormatInt(rnd.Int63n(math.MaxInt64), 10)
-	if err := c.CreateDefaultPool(ctx, poolName); err != nil {
-		return err
-	}
-
-	maxSize := 150 * 1024 * 1024
-	amount := rnd.Intn(50)
-
-	for i := 0; i < amount; i++ {
-		buf := make([]byte, rnd.Intn(maxSize))
-		if _, err := rnd.Read(buf); err != nil {
-			return err
-		}
-
-		hasher := sha256.New()
-		if _, err := hasher.Write(buf); err != nil {
-			return err
-		}
-
-		if err := c.CreateRADOSObject(ctx, poolName, hex.EncodeToString(hasher.Sum(nil)), buf); err != nil {
-			time.Sleep(2 * time.Second)
-		}
-	}
-	return nil
 }
 
 func setRandomNearFullRatio(ctx context.Context, c drivers.Cluster, rnd random.Random) error {

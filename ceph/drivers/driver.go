@@ -28,6 +28,8 @@ type Cluster interface {
 	ReweightByUtilization(ctx context.Context) error
 
 	CreateRADOSObject(ctx context.Context, pool, objectName string, data []byte) error
+	ReadRADOSObject(ctx context.Context, pool, objectName string) ([]byte, error)
+	ListRADOSObjects(ctx context.Context, pool string) ([]string, error)
 
 	SetNearFullRatio(ctx context.Context, value float64) error
 	SetBackfillfullRatio(ctx context.Context, value float64) error
