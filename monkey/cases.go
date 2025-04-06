@@ -79,7 +79,7 @@ func randomlyChangePGNumForRandomPool(ctx context.Context, c drivers.Cluster, rn
 
 	pgNumMax := 256
 	if pool.Options.PgNumMax > 0 {
-		pgNumMax = pool.Options.PgNumMin
+		pgNumMax = pool.Options.PgNumMax
 	}
 
 	return c.ChangePoolPGNum(ctx, pool.PoolName, uint64(rnd.Intn(pgNumMax)+1))

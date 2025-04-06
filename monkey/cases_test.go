@@ -53,12 +53,12 @@ func (s *cephTestSuite) TestRandomlyResizeRandomPool() {
 
 func (s *cephTestSuite) TestRandomlyChangePGNumForRandomPool() {
 	s.cluster.On("GetPools").Return([]ceph.Pool{
-		{PoolID: 1, PoolName: "pool1"},
-		{PoolID: 2, PoolName: "pool2"},
+		{PoolID: 1, PoolName: "pool1", Options: ceph.PoolOptions{PgNumMax: 3}},
+		{PoolID: 2, PoolName: "pool2", Options: ceph.PoolOptions{PgNumMax: 5}},
 	}, nil).Once()
 	s.rnd.On("Intn", 2).Return(1).Once()
-	s.rnd.On("Intn", 256).Return(4).Once()
-	s.cluster.On("ChangePoolPGNum", "pool2", uint64(4)).Return(nil).Once()
+	s.rnd.On("Intn", 5).Return(4).Once()
+	s.cluster.On("ChangePoolPGNum", "pool2", uint64(4+1)).Return(nil).Once()
 
 	err := randomlyChangePGNumForRandomPool(s.ctx, s.cluster, s.rnd)
 	s.Require().NoError(err)

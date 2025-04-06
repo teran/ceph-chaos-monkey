@@ -25,23 +25,25 @@ type Mgr struct {
 	ID string
 }
 
+type PoolOptions struct {
+	PgNumMax int `json:"pg_num_max"`
+	PgNumMin int `json:"pg_num_min"`
+}
+
 type Pool struct {
-	PoolID             int    `json:"pool_id"`
-	PoolName           string `json:"pool_name"`
-	CreateTime         string `json:"create_time"`
-	Size               uint64 `json:"size"`
-	MinSize            uint64 `json:"min_size"`
-	CrushRule          int    `json:"crush_rule"`
-	PgAutoscaleMode    string `json:"pg_autoscale_mode"`
-	PgNum              uint64 `json:"pg_num"`
-	LastChange         string `json:"last_change"`
-	QuotaMaxBytes      uint64 `json:"quota_max_bytes"`
-	QuotaMaxObjects    uint64 `json:"quota_max_objects"`
-	ErasureCodeProfile string `json:"erasure_code_profile"`
-	Options            struct {
-		PgNumMax int `json:"pg_num_max"`
-		PgNumMin int `json:"pg_num_min"`
-	} `json:"options,omitempty"`
+	PoolID             int         `json:"pool_id"`
+	PoolName           string      `json:"pool_name"`
+	CreateTime         string      `json:"create_time"`
+	Size               uint64      `json:"size"`
+	MinSize            uint64      `json:"min_size"`
+	CrushRule          int         `json:"crush_rule"`
+	PgAutoscaleMode    string      `json:"pg_autoscale_mode"`
+	PgNum              uint64      `json:"pg_num"`
+	LastChange         string      `json:"last_change"`
+	QuotaMaxBytes      uint64      `json:"quota_max_bytes"`
+	QuotaMaxObjects    uint64      `json:"quota_max_objects"`
+	ErasureCodeProfile string      `json:"erasure_code_profile"`
+	Options            PoolOptions `json:"options,omitempty"`
 }
 
 type Flag string

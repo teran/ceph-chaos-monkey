@@ -155,6 +155,10 @@ func (s *cephTestSuite) TestGetPools() {
 			QuotaMaxBytes:      0,
 			QuotaMaxObjects:    0,
 			ErasureCodeProfile: "",
+			Options: ceph.PoolOptions{
+				PgNumMax: 32,
+				PgNumMin: 1,
+			},
 		},
 	}, mons)
 }
