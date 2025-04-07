@@ -20,6 +20,8 @@ type Cluster interface {
 
 	SetFlag(ctx context.Context, flag ceph.Flag) error
 	UnsetFlag(ctx context.Context, flag ceph.Flag) error
+	SetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error
+	UnsetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error
 
 	GetPools(ctx context.Context) ([]ceph.Pool, error)
 	CreateDefaultPool(ctx context.Context, name string) error
@@ -37,4 +39,7 @@ type Cluster interface {
 
 	ListHosts(ctx context.Context) ([]ceph.Host, error)
 	DrainHost(ctx context.Context, hostname string) error
+
+	ListPGs(ctx context.Context) ([]ceph.PGStat, error)
+	DeepScrubPG(ctx context.Context, target string) error
 }

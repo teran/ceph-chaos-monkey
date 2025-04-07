@@ -138,6 +138,16 @@ func (c *cluster) UnsetFlag(ctx context.Context, flag ceph.Flag) error {
 	return err
 }
 
+func (c *cluster) SetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, append([]string{"osd", "set-group", string(flag)}, group...)...)
+	return err
+}
+
+func (c *cluster) UnsetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, append([]string{"osd", "unset-group", string(flag)}, group...)...)
+	return err
+}
+
 func (c *cluster) CreateDefaultPool(ctx context.Context, name string) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "pool", "create", name)
 	return err
@@ -217,5 +227,31 @@ func (c *cluster) ListHosts(ctx context.Context) ([]ceph.Host, error) {
 
 func (c *cluster) DrainHost(ctx context.Context, hostname string) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "orch", "host", "drain", hostname)
+	return err
+}
+
+func (c *cluster) ListPGs(ctx context.Context) ([]ceph.PGStat, error) {
+	type pgstat struct {
+		PgStats []ceph.PGStat `json:"pg_stats"`
+	}
+
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "pg", "ls", "--format=json")
+	if err != nil {
+		return nil, err
+	}
+
+	data := pgstat{}
+	if err := json.Unmarshal(stdout, &data); err != nil {
+		return nil, err
+	}
+
+	return data.PgStats, nil
+}
+
+func (c *cluster) DeepScrubPG(ctx context.Context, target string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "pg", "deep-scrub", target)
+	if err != nil {
+		return err
+	}
 	return err
 }
