@@ -34,4 +34,7 @@ type Cluster interface {
 	SetNearFullRatio(ctx context.Context, value float64) error
 	SetBackfillfullRatio(ctx context.Context, value float64) error
 	SetFullRatio(ctx context.Context, value float64) error
+
+	ListHosts(ctx context.Context) ([]ceph.Host, error)
+	DrainHost(ctx context.Context, hostname string) error
 }

@@ -190,6 +190,10 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 			name: "remove random monitor",
 			fn:   removeRandomMonitor,
 		},
+		{
+			name: "drain random host",
+			fn:   drainRandomHost,
+		},
 	}
 
 	c := cases[m.rnd.Intn(len(cases))]

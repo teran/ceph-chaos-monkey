@@ -1,0 +1,52 @@
+[
+    {
+        "addr": "100.64.65.19",
+        "hostname": "ceph01",
+        "labels": [
+            "_admin",
+            "mon",
+            "mgr"
+        ],
+        "status": ""
+    },
+    {
+        "addr": "100.64.65.20",
+        "hostname": "ceph02",
+        "labels": [
+            "_admin",
+            "mon",
+            "mgr"
+        ],
+        "status": ""
+    },
+    {
+        "addr": "100.64.65.21",
+        "hostname": "ceph03",
+        "labels": [
+            "_admin",
+            "mon",
+            "mgr"
+        ],
+        "status": ""
+    },
+    {
+        "addr": "100.64.65.23",
+        "hostname": "ceph04",
+        "labels": [
+            "_admin",
+            "_no_schedule",
+            "_no_conf_keyring"
+        ],
+        "status": ""
+    },
+    {
+        "addr": "100.64.65.24",
+        "hostname": "ceph05",
+        "labels": [
+            "_admin",
+            "_no_schedule",
+            "_no_conf_keyring"
+        ],
+        "status": ""
+    }
+]

@@ -106,6 +106,19 @@ func (s *cephTestSuite) TestRemoveMonitor() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestDrainRandomHost() {
+	s.cluster.On("ListHosts").Return([]ceph.Host{
+		{Hostname: "host1"},
+		{Hostname: "host2"},
+		{Hostname: "host3"},
+	}, nil).Once()
+	s.rnd.On("Intn", 3).Return(2).Once()
+	s.cluster.On("DrainHost", "host3").Return(nil).Once()
+
+	err := drainRandomHost(s.ctx, s.cluster, s.rnd)
+	s.Require().NoError(err)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite

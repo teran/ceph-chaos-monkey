@@ -200,3 +200,22 @@ func (c *cluster) RemoveMonitor(ctx context.Context, name string) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "mon", "remove", name)
 	return err
 }
+
+func (c *cluster) ListHosts(ctx context.Context) ([]ceph.Host, error) {
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "orch", "host", "ls", "--format=json")
+	if err != nil {
+		return nil, err
+	}
+
+	data := []ceph.Host{}
+	if err := json.Unmarshal(stdout, &data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (c *cluster) DrainHost(ctx context.Context, hostname string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "orch", "host", "drain", hostname)
+	return err
+}

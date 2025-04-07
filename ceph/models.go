@@ -76,3 +76,10 @@ type Health struct {
 	Checks map[string]HealthCheck `json:"checks"`
 	Mutes  []any                  `json:"mutes"`
 }
+
+type Host struct {
+	Addr     string   `json:"addr"`
+	Hostname string   `json:"hostname"`
+	Labels   []string `json:"labels"`
+	Status   string   `json:"status"`
+}
