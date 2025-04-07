@@ -19,7 +19,6 @@ var cephFlags = []ceph.Flag{
 	ceph.FlagNoRecover,
 	ceph.FlagNoScrub,
 	ceph.FlagNoUp,
-	ceph.FlagPause,
 }
 
 func setRandomFlag(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
