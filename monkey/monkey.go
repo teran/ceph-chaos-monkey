@@ -69,6 +69,12 @@ if you have such a small clusters with important data please check twice where
 you're running ceph-chaos-monkey.`)
 	m.printer.Println()
 
+	if m.interval < 30*time.Second || m.duration > time.Hour {
+		m.printer.Println("Games are limited with interval >=30s and duration <=1h")
+		fmt.Println()
+		return nil
+	}
+
 	questions := []string{
 		"Your Ceph cluster could be permanently damaged, are you sure you want to proceed?",
 		"The data in your Ceph cluster could be permanently lost, are you still sure to proceed?",
