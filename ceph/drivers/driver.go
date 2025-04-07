@@ -39,4 +39,7 @@ type Cluster interface {
 
 	ListHosts(ctx context.Context) ([]ceph.Host, error)
 	DrainHost(ctx context.Context, hostname string) error
+
+	ListPGs(ctx context.Context) ([]ceph.PGStat, error)
+	DeepScrubPG(ctx context.Context, target string) error
 }

@@ -83,3 +83,9 @@ type Host struct {
 	Labels   []string `json:"labels"`
 	Status   string   `json:"status"`
 }
+
+type PGStat struct {
+	PGID  string   `json:"pgid"`
+	State string   `json:"state"`
+	Up    []uint64 `json:"up"`
+}

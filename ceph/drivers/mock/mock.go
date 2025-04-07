@@ -137,3 +137,13 @@ func (m *Mock) DrainHost(ctx context.Context, hostname string) error {
 	args := m.Called(hostname)
 	return args.Error(0)
 }
+
+func (m *Mock) ListPGs(context.Context) ([]ceph.PGStat, error) {
+	args := m.Called()
+	return args.Get(0).([]ceph.PGStat), args.Error(1)
+}
+
+func (m *Mock) DeepScrubPG(_ context.Context, target string) error {
+	args := m.Called(target)
+	return args.Error(0)
+}

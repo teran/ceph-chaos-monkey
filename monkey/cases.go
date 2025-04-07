@@ -165,3 +165,14 @@ func unsetRandomFlagFromRandomGroup(ctx context.Context, c drivers.Cluster, rnd 
 
 	return c.UnsetGroupFlag(ctx, cephFlags[rnd.Intn(len(cephFlags))], targets[:int(len(targets)/3)]...)
 }
+
+func deepScrubRandomPG(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	pgs, err := c.ListPGs(ctx)
+	if err != nil {
+		return err
+	}
+
+	pg := pgs[rnd.Intn(len(pgs))]
+
+	return c.DeepScrubPG(ctx, pg.PGID)
+}

@@ -229,3 +229,29 @@ func (c *cluster) DrainHost(ctx context.Context, hostname string) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "orch", "host", "drain", hostname)
 	return err
 }
+
+func (c *cluster) ListPGs(ctx context.Context) ([]ceph.PGStat, error) {
+	type pgstat struct {
+		PgStats []ceph.PGStat `json:"pg_stats"`
+	}
+
+	stdout, _, err := c.runner.RunCephBinary(ctx, nil, "pg", "ls", "--format=json")
+	if err != nil {
+		return nil, err
+	}
+
+	data := pgstat{}
+	if err := json.Unmarshal(stdout, &data); err != nil {
+		return nil, err
+	}
+
+	return data.PgStats, nil
+}
+
+func (c *cluster) DeepScrubPG(ctx context.Context, target string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, "pg", "deep-scrub", target)
+	if err != nil {
+		return err
+	}
+	return err
+}
