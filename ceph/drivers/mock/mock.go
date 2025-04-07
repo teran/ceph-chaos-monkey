@@ -58,6 +58,16 @@ func (m *Mock) UnsetFlag(_ context.Context, flag ceph.Flag) error {
 	return args.Error(0)
 }
 
+func (m *Mock) SetGroupFlag(_ context.Context, flag ceph.Flag, group ...string) error {
+	args := m.Called(flag, group)
+	return args.Error(0)
+}
+
+func (m *Mock) UnsetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error {
+	args := m.Called(flag, group)
+	return args.Error(0)
+}
+
 func (m *Mock) GetPools(context.Context) ([]ceph.Pool, error) {
 	args := m.Called()
 	return args.Get(0).([]ceph.Pool), args.Error(1)

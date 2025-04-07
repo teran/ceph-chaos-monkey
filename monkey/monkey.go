@@ -194,6 +194,14 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 			name: "drain random host",
 			fn:   drainRandomHost,
 		},
+		{
+			name: "set random flag for random group",
+			fn:   setRandomFlagForRandomGroup,
+		},
+		{
+			name: "unset random flag from random group",
+			fn:   unsetRandomFlagFromRandomGroup,
+		},
 	}
 
 	c := cases[m.rnd.Intn(len(cases))]
