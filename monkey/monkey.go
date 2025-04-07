@@ -202,6 +202,10 @@ func (m *monkey) doSomeFuss(ctx context.Context) error {
 			name: "unset random flag from random group",
 			fn:   unsetRandomFlagFromRandomGroup,
 		},
+		{
+			name: "run deep-scrub for random PG",
+			fn:   deepScrubRandomPG,
+		},
 	}
 
 	c := cases[m.rnd.Intn(len(cases))]

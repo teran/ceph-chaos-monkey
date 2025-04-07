@@ -306,6 +306,22 @@ func (s *cephTestSuite) TestDrainHost() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestListPGs() {
+	stdout, err := os.ReadFile("testdata/pg-ls.json")
+	s.Require().NoError(err)
+
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"pg", "ls", "--format=json"}).Return(stdout, []byte{}, nil).Once()
+	pgs, err := s.cluster.ListPGs(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]ceph.PGStat{
+		{
+			PGID:  "1.0",
+			State: "active+clean",
+			Up:    []uint64{3, 2, 1},
+		},
+	}, pgs)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite
