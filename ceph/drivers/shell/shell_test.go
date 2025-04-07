@@ -249,6 +249,49 @@ func (s *cephTestSuite) TestListRADOSObjects() {
 	s.Require().Equal([]string{"obj1", "obj2"}, pools)
 }
 
+func (s *cephTestSuite) TestListHosts() {
+	stdout, err := os.ReadFile("testdata/orch-host-ls.json")
+	s.Require().NoError(err)
+
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"orch", "host", "ls", "--format=json"}).Return(stdout, []byte{}, nil).Once()
+	hosts, err := s.cluster.ListHosts(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]ceph.Host{
+		{
+			Hostname: "ceph01",
+			Addr:     "100.64.65.19",
+			Labels:   []string{"_admin", "mon", "mgr"},
+		},
+		{
+			Hostname: "ceph02",
+			Addr:     "100.64.65.20",
+			Labels:   []string{"_admin", "mon", "mgr"},
+		},
+		{
+			Hostname: "ceph03",
+			Addr:     "100.64.65.21",
+			Labels:   []string{"_admin", "mon", "mgr"},
+		},
+		{
+			Hostname: "ceph04",
+			Addr:     "100.64.65.23",
+			Labels:   []string{"_admin", "_no_schedule", "_no_conf_keyring"},
+		},
+		{
+			Hostname: "ceph05",
+			Addr:     "100.64.65.24",
+			Labels:   []string{"_admin", "_no_schedule", "_no_conf_keyring"},
+		},
+	}, hosts)
+}
+
+func (s *cephTestSuite) TestDrainHost() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"orch", "host", "drain", "test-host"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.DrainHost(s.ctx, "test-host")
+	s.Require().NoError(err)
+}
+
 // ======================= definitions =======================
 type cephTestSuite struct {
 	suite.Suite

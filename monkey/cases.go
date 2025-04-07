@@ -106,3 +106,14 @@ func removeRandomMonitor(ctx context.Context, c drivers.Cluster, rnd random.Rand
 
 	return c.RemoveMonitor(ctx, mon.Name)
 }
+
+func drainRandomHost(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	hosts, err := c.ListHosts(ctx)
+	if err != nil {
+		return err
+	}
+
+	host := hosts[rnd.Intn(len(hosts))]
+
+	return c.DrainHost(ctx, host.Hostname)
+}
