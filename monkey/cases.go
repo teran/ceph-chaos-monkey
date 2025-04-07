@@ -3,6 +3,7 @@ package monkey
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/teran/go-collection/random"
 
@@ -115,4 +116,52 @@ func drainRandomHost(ctx context.Context, c drivers.Cluster, rnd random.Random) 
 	host := hosts[rnd.Intn(len(hosts))]
 
 	return c.DrainHost(ctx, host.Hostname)
+}
+
+func setRandomFlagForRandomGroup(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	targets := []string{}
+
+	osdIDs, err := c.GetOSDIDs(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range osdIDs {
+		targets = append(targets, "osd."+strconv.FormatUint(o, 10))
+	}
+
+	hosts, err := c.ListHosts(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, h := range hosts {
+		targets = append(targets, h.Hostname)
+	}
+
+	return c.SetGroupFlag(ctx, cephFlags[rnd.Intn(len(cephFlags))], targets[:int(len(targets)/3)]...)
+}
+
+func unsetRandomFlagFromRandomGroup(ctx context.Context, c drivers.Cluster, rnd random.Random) error {
+	targets := []string{}
+
+	osdIDs, err := c.GetOSDIDs(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range osdIDs {
+		targets = append(targets, "osd."+strconv.FormatUint(o, 10))
+	}
+
+	hosts, err := c.ListHosts(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, h := range hosts {
+		targets = append(targets, h.Hostname)
+	}
+
+	return c.UnsetGroupFlag(ctx, cephFlags[rnd.Intn(len(cephFlags))], targets[:int(len(targets)/3)]...)
 }

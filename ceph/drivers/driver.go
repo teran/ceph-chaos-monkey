@@ -20,6 +20,8 @@ type Cluster interface {
 
 	SetFlag(ctx context.Context, flag ceph.Flag) error
 	UnsetFlag(ctx context.Context, flag ceph.Flag) error
+	SetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error
+	UnsetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error
 
 	GetPools(ctx context.Context) ([]ceph.Pool, error)
 	CreateDefaultPool(ctx context.Context, name string) error

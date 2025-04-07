@@ -138,6 +138,16 @@ func (c *cluster) UnsetFlag(ctx context.Context, flag ceph.Flag) error {
 	return err
 }
 
+func (c *cluster) SetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, append([]string{"osd", "set-group", string(flag)}, group...)...)
+	return err
+}
+
+func (c *cluster) UnsetGroupFlag(ctx context.Context, flag ceph.Flag, group ...string) error {
+	_, _, err := c.runner.RunCephBinary(ctx, nil, append([]string{"osd", "unset-group", string(flag)}, group...)...)
+	return err
+}
+
 func (c *cluster) CreateDefaultPool(ctx context.Context, name string) error {
 	_, _, err := c.runner.RunCephBinary(ctx, nil, "osd", "pool", "create", name)
 	return err

@@ -120,6 +120,20 @@ func (s *cephTestSuite) TestUnsetFlag() {
 	s.Require().NoError(err)
 }
 
+func (s *cephTestSuite) TestSetGroupFlag() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "set-group", "norecover", "group1", "group2"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.SetGroupFlag(s.ctx, ceph.FlagNoRecover, "group1", "group2")
+	s.Require().NoError(err)
+}
+
+func (s *cephTestSuite) TestUnsetGroupFlag() {
+	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "unset-group", "norecover", "group1", "group2"}).Return([]byte{}, []byte{}, nil).Once()
+
+	err := s.cluster.UnsetGroupFlag(s.ctx, ceph.FlagNoRecover, "group1", "group2")
+	s.Require().NoError(err)
+}
+
 func (s *cephTestSuite) TestDestroyOSD() {
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "out", "osd.10"}).Return([]byte{}, []byte{}, nil).Once()
 	s.runnerMock.On("RunCephBinary", []byte(nil), []string{"osd", "down", "osd.10"}).Return([]byte{}, []byte{}, nil).Once()
