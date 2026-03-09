@@ -1,13 +1,13 @@
 module github.com/teran/ceph-chaos-monkey
 
-go 1.24.1
+go 1.25.0
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/teran/go-collection v0.4.3
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
